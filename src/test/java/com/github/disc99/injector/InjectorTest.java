@@ -3,9 +3,9 @@ package com.github.disc99.injector;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import org.junit.Test;
+import javax.inject.Inject;
 
-import pl.playbit.di.annotations.Inject;
+import org.junit.Test;
 
 public class InjectorTest {
 
@@ -16,7 +16,6 @@ public class InjectorTest {
         int actual = controller.index();
         assertThat(actual, is(10));
     }
-
 }
 
 class Controller {
@@ -35,6 +34,17 @@ interface Service {
 class CalcService implements Service {
     @Override
     public int exe() {
+        return 10;
+    }
+}
+
+interface Dao {
+    int select();
+}
+
+class CountDao implements Dao {
+    @Override
+    public int select() {
         return 10;
     }
 }

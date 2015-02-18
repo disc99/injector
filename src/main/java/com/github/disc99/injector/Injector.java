@@ -1,32 +1,97 @@
 package com.github.disc99.injector;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class Injector {
+
+    InjectionMappring mappring;
+
+    public Injector() {
+        init(null);
+    }
+
+    public Injector(InjectionMappring mappring) {
+        init(mappring);
+    }
+
+    private void init(InjectionMappring mappring) {
+        // TODO Auto-generated method stub
+        List<Class<?>> injectTargetClasses = findInjectClass();
+        List<Class<?>> injectedClasses = findInjectedClass();
+
+        for (Class<?> targetClass : injectTargetClasses) {
+            if (mappring.isBinded(targetClass)) {
+                continue;
+            }
+            List<Class<?>> extractClasses = extractInjectionClasses(targetClass, injectedClasses);
+            if (extractClasses.size() != 1) {
+                throw new InjectException("fail class mapping.");
+            }
+
+        }
+
+    }
+
+    private List<Class<?>> extractInjectionClasses(Class<?> targetClass, List<Class<?>> injectedClasses) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private List<Class<?>> findInjectClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private List<Class<?>> findInjectedClass() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     public <T> T getInstance(Class<T> clazz) {
         try {
             T instance = clazz.newInstance();
-
-            // inject fields
             injectFields(instance);
-
-            // return instance
             return instance;
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new InjectException("fail new instance.", e);
+            throw new InjectException("fail get instance.", e);
         }
     }
 
-    private <T> void injectFields(T t) {
-        // TODO
-        List<?> classes = searchInjectClasses(t);
-
+    private <T> void injectFields(T instance) throws InstantiationException, IllegalAccessException {
+        final Optional<List<Field>> injectTargetFields = findTargetFields(instance);
+        if (injectTargetFields.isPresent()) {
+            for (Field field : injectTargetFields.get()) {
+                Object injectedInstance = findInjectClass(field).newInstance();
+                field.set(instance, injectedInstance);
+                injectFields(injectedInstance);
+            }
+        }
     }
 
-    private <T> List<?> searchInjectClasses(T t) {
-        // TODO search @Inject fields
-
+    private Class<?> findInjectClass(Field field) {
+        // TODO Auto-generated method stub
         return null;
+    }
+
+    private <T> Optional<List<Field>> findTargetFields(T instance) {
+        // TODO
+        return null;
+    }
+}
+
+class InjectionMappring {
+    private Map<Class<?>, Class<?>> mapping = new HashMap<>();
+
+    public InjectionMappring bind(Class<?> key, Class<?> value) {
+        mapping.put(key, value);
+        return this;
+    }
+
+    public boolean isBinded(Class<?> cls) {
+        return mapping.containsKey(cls);
     }
 }
