@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class Injector {
 
-    InjectionMappring mappring;
+    private InjectionMappring mappring;
 
     public Injector() {
         init(null);
@@ -27,16 +27,12 @@ public class Injector {
             if (mappring.isBinded(targetClass)) {
                 continue;
             }
-            List<Class<?>> extractClasses = extractInjectionClasses(targetClass, injectedClasses);
-            if (extractClasses.size() != 1) {
-                throw new InjectException("fail class mapping.");
-            }
-
+            Class<?> extractedClass = extractInjectionClasses(targetClass, injectedClasses);
+            mappring.bind(targetClass, extractedClass);
         }
-
     }
 
-    private List<Class<?>> extractInjectionClasses(Class<?> targetClass, List<Class<?>> injectedClasses) {
+    private Class<?> extractInjectionClasses(Class<?> targetClass, List<Class<?>> injectedClasses) {
         // TODO Auto-generated method stub
         return null;
     }
