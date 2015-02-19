@@ -16,6 +16,11 @@ public class InjectorTest {
         int actual = controller.index();
         assertThat(actual, is(10));
     }
+
+    @Test
+    public void testName() throws Exception {
+        new ClassScanner().scan("").stream().forEach(System.out::println);
+    }
 }
 
 class Controller {

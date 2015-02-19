@@ -8,27 +8,27 @@ import java.util.Optional;
 
 public class Injector {
 
-    private InjectionMappring mappring;
+    private Dependencies dependencies;
 
     public Injector() {
         init(null);
     }
 
-    public Injector(InjectionMappring mappring) {
-        init(mappring);
+    public Injector(Dependencies dependencies) {
+        init(dependencies);
     }
 
-    private void init(InjectionMappring mappring) {
+    private void init(Dependencies dependencies) {
         // TODO Auto-generated method stub
         List<Class<?>> injectTargetClasses = findInjectClass();
         List<Class<?>> injectedClasses = findInjectedClass();
 
         for (Class<?> targetClass : injectTargetClasses) {
-            if (mappring.isBinded(targetClass)) {
+            if (dependencies.isBound(targetClass)) {
                 continue;
             }
             Class<?> extractedClass = extractInjectionClasses(targetClass, injectedClasses);
-            mappring.bind(targetClass, extractedClass);
+            dependencies.bind(targetClass, extractedClass);
         }
     }
 
@@ -79,15 +79,15 @@ public class Injector {
     }
 }
 
-class InjectionMappring {
+class Dependencies {
     private Map<Class<?>, Class<?>> mapping = new HashMap<>();
 
-    public InjectionMappring bind(Class<?> key, Class<?> value) {
+    public Dependencies bind(Class<?> key, Class<?> value) {
         mapping.put(key, value);
         return this;
     }
 
-    public boolean isBinded(Class<?> cls) {
+    public boolean isBound(Class<?> cls) {
         return mapping.containsKey(cls);
     }
 }
