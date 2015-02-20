@@ -1,13 +1,11 @@
-package com.github.disc99.injector;
+# injector
+injector is minimal dependency injection container.
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+## How to use
 
-import javax.inject.Inject;
-import javax.inject.Named;
+- Named injection.
 
-import org.junit.Test;
-
+```java
 public class InjectorTest {
 
     @Test
@@ -16,16 +14,6 @@ public class InjectorTest {
         Controller controller = injector.getInstance(Controller.class);
         String actual = controller.index();
         assertThat(actual, is("2000-01-01"));
-    }
-
-    @Test
-    public void testConfigInjection() {
-        Injector injector = new Injector(new ClassDependencies()
-                .bind(Logic.class, CountLogic.class)
-                .bind(Task.class, CancelTask.class));
-        Batch batch = injector.getInstance(Batch.class);
-        String actual = batch.exe();
-        assertThat(actual, is("10-Complete"));
     }
 }
 
@@ -80,6 +68,24 @@ class DotConverter implements Converter {
     }
 }
 
+```
+
+- Configuration injection.
+
+```java
+public class InjectorTest {
+
+    @Test
+    public void testConfigInjection() {
+        Injector injector = new Injector(new ClassDependencies()
+                .bind(Logic.class, CountLogic.class)
+                .bind(Task.class, CancelTask.class));
+        Batch batch = injector.getInstance(Batch.class);
+        String actual = batch.exe();
+        assertThat(actual, is("10-Complete"));
+    }
+}
+
 class Batch {
     @Inject
     private Logic logic;
@@ -114,3 +120,9 @@ class CancelTask implements Task {
     }
 
 }
+
+```
+
+## Requirements
+
+* JDK 8 +

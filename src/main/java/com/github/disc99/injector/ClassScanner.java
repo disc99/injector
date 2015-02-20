@@ -36,7 +36,7 @@ public final class ClassScanner {
         return packageName.replace('.', '/');
     }
 
-    public List<Class<?>> scan(String rootPackageName) throws Exception {
+    public List<Class<?>> scan(String rootPackageName) {
         String resourceName = packageNameToResourceName(rootPackageName);
         URL url = classLoader.getResource(resourceName);
 
@@ -45,13 +45,17 @@ public final class ClassScanner {
         }
 
         String protocol = url.getProtocol();
-        if ("file".equals(protocol)) {
-            return findClassesWithFile(rootPackageName, new File(url.getFile()));
-        } else if ("jar".equals(protocol)) {
-            return findClassesWithJarFile(rootPackageName, url);
+        try {
+            if ("file".equals(protocol)) {
+                return findClassesWithFile(rootPackageName, new File(url.getFile()));
+            } else if ("jar".equals(protocol)) {
+                return findClassesWithJarFile(rootPackageName, url);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException();
         }
+        throw new RuntimeException("Unsupported Class Load Protodol[" + protocol + "]");
 
-        throw new IllegalArgumentException("Unsupported Class Load Protodol[" + protocol + "]");
     }
 
     private List<Class<?>> findClassesWithFile(String packageName, File dir) throws Exception {
