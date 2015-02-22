@@ -8,21 +8,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import com.github.disc99.injector.util.ClassScanner;
+
 public class Injector {
 
-    private Class<? extends Annotation> INJECT = javax.inject.Inject.class;
-    private Class<? extends Annotation> NAMED = javax.inject.Named.class;
+    private static final Class<? extends Annotation> INJECT = javax.inject.Inject.class;
+    private static final Class<? extends Annotation> NAMED = javax.inject.Named.class;
+    private static final List<Class<?>> namedClasses = new ClassScanner().scan("").stream()
+            .filter(clz -> clz.isAnnotationPresent(NAMED))
+            .collect(toList());;
 
     private ClassDependencies dependencies = new ClassDependencies();
-    private List<Class<?>> namedClasses;
 
     public Injector() {
-        init();
     }
 
     public Injector(ClassDependencies dependencies) {
         this.dependencies = dependencies;
-        init();
     }
 
     public <T> T getInstance(Class<T> clazz) {
@@ -30,16 +32,9 @@ public class Injector {
             T instance = clazz.newInstance();
             injectFields(instance);
             return instance;
-        } catch (InstantiationException | IllegalAccessException e) {
+        } catch (Exception e) {
             throw new InjectException("Fail get instance.", e);
         }
-    }
-
-    private void init() {
-        List<Class<?>> allClasses = new ClassScanner().scan("");
-        this.namedClasses = allClasses.stream()
-                .filter(clz -> clz.isAnnotationPresent(NAMED))
-                .collect(toList());
     }
 
     private <T> void injectFields(T instance) throws InstantiationException, IllegalAccessException {
@@ -70,7 +65,7 @@ public class Injector {
         } else if (foundClasses.isEmpty()) {
             throw new InjectException("Injection class not found: " + injectClass);
         } else {
-            throw new InjectException("Injection class there is more than one.");
+            throw new InjectException("Injection class there is more than one: " + injectClass);
         }
     }
 

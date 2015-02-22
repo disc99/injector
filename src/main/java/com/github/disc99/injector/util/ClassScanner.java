@@ -1,9 +1,13 @@
-package com.github.disc99.injector;
+package com.github.disc99.injector.util;
+
+import static com.github.disc99.injector.util.Throwables.uncheck;
+import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -78,29 +82,17 @@ public final class ClassScanner {
     }
 
     private List<Class<?>> findClassesWithJarFile(String rootPackageName, URL jarFileUrl) throws Exception {
-        List<Class<?>> classes = new ArrayList<Class<?>>();
 
         JarURLConnection jarUrlConnection = (JarURLConnection) jarFileUrl.openConnection();
-        JarFile jarFile = null;
+        try (JarFile jarFile = jarUrlConnection.getJarFile();) {
 
-        try {
-            jarFile = jarUrlConnection.getJarFile();
-            Enumeration<JarEntry> jarEnum = jarFile.entries();
-
-            String packageNameAsResourceName = packageNameToResourceName(rootPackageName);
-
-            while (jarEnum.hasMoreElements()) {
-                JarEntry jarEntry = jarEnum.nextElement();
-                if (jarEntry.getName().startsWith(packageNameAsResourceName) && isClassFile(jarEntry.getName())) {
-                    classes.add(classLoader.loadClass(resourceNameToClassName(jarEntry.getName())));
-                }
-            }
-        } finally {
-            if (jarFile != null) {
-                jarFile.close();
-            }
+            Enumeration<JarEntry> jarEntry = jarFile.entries();
+            return Collections.list(jarEntry).stream()
+                    .filter(jar -> jar.getName().startsWith(packageNameToResourceName(rootPackageName)))
+                    .filter(jar -> isClassFile(jar.getName()))
+                    .map(jar -> resourceNameToClassName(jar.getName()))
+                    .map(uncheck(jar -> classLoader.loadClass(jar)))
+                    .collect(toList());
         }
-
-        return classes;
     }
 }
